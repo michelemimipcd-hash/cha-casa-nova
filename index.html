@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chá de Casa Nova - Pablo & Michele</title>
+
+<style>
+
+body{
+    background:#f5f1ea;
+    font-family:Arial, sans-serif;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    color:#44513b;
+}
+
+h2{
+    text-align:center;
+    color:#b06d4f;
+}
+
+.pix{
+    text-align:center;
+}
+
+.botao{
+    background:#44513b;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h1>🏡 Chá de Casa Nova</h1>
+
+<h2>Pablo & Michele</h2>
+
+<p style="text-align:center;">
+Estamos realizando o sonho da nossa casa nova e ficaremos muito felizes em compartilhar esse momento com você.
+</p>
+
+</div>
+
+<div class="card pix">
+
+<h3>💳 PIX</h3>
+
+<p><strong>Michele de Souza Gonçalves</strong></p>
+
+<p>61 98590-5870</p>
+
+<button class="botao">
+Copiar PIX
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>📝 Reservar Presentes</h3>
+
+<p>Nome:</p>
+<input
+    type="text"
+    id="nome"
+    placeholder="Digite seu nome"
+    style="width:100%;padding:10px;margin-bottom:10px;"
+>
+
+<p>Telefone:</p>
+<input
+    type="text"
+    id="telefone"
+    placeholder="(61) 99999-9999"
+    style="width:100%;padding:10px;margin-bottom:15px;"
+>
+
+<button
+    id="btnReservar"
+    class="botao"
+>
+    Reservar Presentes
+</button>
+
+<div id="mensagem" style="margin-top:15px;"></div>
+
+</div>
+
+<div class="card">
+
+<h3>🎁 Lista de Presentes</h3>
+
+<div id="lista">
+Carregando presentes...
+</div>
+
+</div>
+
+<script>
+
+const API =
+"https://script.google.com/macros/s/AKfycbzxXWV2cAXK7RdRAHNQqD6DD3-fExRYRyM0IJUsilCIevVjavapNJjVOgOO_byo_EF4TA/exec";
+
+async function carregarPresentes(){
+
+    try{
+
+        const resposta = await fetch(API);
+
+        const dados = await resposta.json();
+
+        let html = "";
+
+       dados.forEach(item => {
+
+    let status = "";
+
+    if(item.reservado === "SIM"){
+
+        status = `
+        <span style="color:red;font-weight:bold;">
+            🔒 Reservado por ${item.nome}
+        </span>`;
+
+    }else{
+
+        status = `
+        <label>
+            <input
+                type="checkbox"
+                class="presente"
+                value="${item.id}">
+            Selecionar
+        </label>`;
+
+    }
+
+    html += `
+    <div style="
+        padding:10px;
+        border-bottom:1px solid #ddd;
+    ">
+
+        <strong>${item.item}</strong><br>
+
+        Categoria: ${item.categoria}
+
+        <br><br>
+
+        ${status}
+
+    </div>
+    `;
+
+});
+
+        document.getElementById("lista").innerHTML = html;
+
+    }
+    catch(erro){
+
+        document.getElementById("lista").innerHTML =
+        "Erro ao carregar presentes.";
+
+        console.log(erro);
+
+    }
+
+}
+
+carregarPresentes();
+document
+.getElementById("btnReservar")
+.addEventListener("click", reservar);
+
+async function reservar(){
+
+    const nome =
+    document.getElementById("nome").value;
+
+    const telefone =
+    document.getElementById("telefone").value;
+
+    const selecionados =
+    document.querySelectorAll(
+        ".presente:checked"
+    );
+
+    let itens = [];
+
+    selecionados.forEach(item => {
+
+        itens.push(
+            Number(item.value)
+        );
+
+    });
+
+    try {
+
+        const resposta = await fetch(API, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                nome,
+                telefone,
+                itens
+            })
+
+        });
+
+        document
+        .getElementById("mensagem")
+        .innerHTML =
+        "✅ Reserva realizada com sucesso!";
+
+        carregarPresentes();
+
+    }
+    catch(erro){
+
+        document
+        .getElementById("mensagem")
+        .innerHTML =
+        "❌ Erro ao realizar reserva.";
+
+        console.log(erro);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
